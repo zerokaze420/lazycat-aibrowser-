@@ -1,0 +1,7 @@
+/result
+result
+.git
+*.qcow2
+*.raw
+.agents
+.codex

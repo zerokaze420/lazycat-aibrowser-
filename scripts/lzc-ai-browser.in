@@ -1,0 +1,35 @@
+#!@shell@
+set -e
+
+profile_dir="${XDG_CONFIG_HOME:-$HOME/.config}/lzc-ai-browser"
+browser_dir="$HOME/.local/share/lzc-ai-browser"
+extension_hash="@extensionHash@"
+
+export QT_PLUGIN_PATH="@qtPluginPath@${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+
+@coreutils@/bin/mkdir -p "$profile_dir/extensions" "$profile_dir/NativeMessagingHosts"
+
+if [ -L "$browser_dir" ] || [ ! -e "$browser_dir" ]; then
+  @coreutils@/bin/mkdir -p "$HOME/.local/share"
+  @coreutils@/bin/ln -sfn "@out@/share/lzc-ai-browser" "$browser_dir"
+fi
+
+if [ ! -e "$profile_dir/extensions/lazycat-autologin/manifest.json" ]; then
+  @coreutils@/bin/rm -rf "$profile_dir/extensions/lazycat-autologin"
+  @coreutils@/bin/cp -R "@out@/share/lzc-ai-browser/extensions/lazycat-autologin" "$profile_dir/extensions/lazycat-autologin"
+  @coreutils@/bin/chmod -R u+rwX "$profile_dir/extensions/lazycat-autologin"
+fi
+
+if [ ! -e "$profile_dir/extensions/cloud.lazycat.app.ai.sha256sum" ] ||
+   [ "$(@coreutils@/bin/cat "$profile_dir/extensions/cloud.lazycat.app.ai.sha256sum")" != "$extension_hash" ]; then
+  @coreutils@/bin/rm -rf "$profile_dir/extensions/cloud.lazycat.app.ai"
+  @coreutils@/bin/cp -R "@out@/share/lzc-ai-browser/extensions/cloud.lazycat.app.ai" "$profile_dir/extensions/cloud.lazycat.app.ai"
+  @coreutils@/bin/chmod -R u+rwX "$profile_dir/extensions/cloud.lazycat.app.ai"
+  @coreutils@/bin/printf '%s' "$extension_hash" > "$profile_dir/extensions/cloud.lazycat.app.ai.sha256sum"
+fi
+
+@coreutils@/bin/ln -sf \
+  "@out@/share/lzc-ai-browser/extensions/cloud.lazycat.aibrowser.extension.json" \
+  "$profile_dir/NativeMessagingHosts/cloud.lazycat.aibrowser.extension.json"
+
+exec -a lzc-ai-browser "@out@/share/lzc-ai-browser/lzc-ai-browser-busybox" "$@"

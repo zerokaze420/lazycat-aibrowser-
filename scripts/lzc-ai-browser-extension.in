@@ -1,0 +1,2 @@
+#!@shell@
+exec -a lzc-ai-browser-extension "@out@/share/lzc-ai-browser/lzc-ai-browser-busybox" "$@"

@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["**.nix", ".github/**"]
+  pull_request:
+    branches: [main]
+    paths: ["**.nix", ".github/**"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Flake show
+        run: nix flake show
+      - name: Flake check
+        run: nix flake check --no-build --impure
+        env:
+          NIXPKGS_ALLOW_UNFREE: 1
